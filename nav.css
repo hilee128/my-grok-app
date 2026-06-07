@@ -1,9 +1,21 @@
 .top-nav {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  font-size: 0.85rem;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .top-nav {
+    gap: 6px;
+    font-size: 0.75rem;
+  }
+
+  .nav-link {
+    padding: 5px 10px;
+  }
 }
 
 .nav-link {
