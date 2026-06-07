@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: my-grok-app
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: API_MODE
+        value: mock
+      - key: TEAM_ACCESS_PASSWORD
+        generateValue: true
+      - key: AUTO_PAUSE_SCHEDULE
+        value: "false"
+      - key: PORT
+        value: "8000"
