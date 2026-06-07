@@ -32,6 +32,26 @@
       </div>
     </header>
 
+    <section class="auto-cutoff-bar">
+      <label class="toggle" title="효율 저하 캠페인 예산 자동 중단">
+        <input type="checkbox" id="auto-cutoff-toggle" checked>
+        <span class="toggle-slider"></span>
+      </label>
+      <div class="auto-cutoff-copy">
+        <strong>효율 저하 캠페인 예산 자동 중단</strong>
+        <p>광고비 50만 원 이상 · ROAS 150% 미만이면 예산을 자동으로 OFF 합니다.</p>
+      </div>
+      <span class="badge badge-accent" id="auto-cutoff-status">자동 중단 ON</span>
+    </section>
+
+    <section class="auto-pause-banner" id="auto-pause-banner" hidden>
+      <span class="auto-pause-icon">🛑</span>
+      <div>
+        <strong id="auto-pause-title"></strong>
+        <p id="auto-pause-desc"></p>
+      </div>
+    </section>
+
     <section class="summary-banner" id="summary-banner" hidden>
       <span class="summary-icon">💡</span>
       <p id="summary-text"></p>
@@ -55,6 +75,7 @@
               <th>매출</th>
               <th>ROAS</th>
               <th>CPA</th>
+              <th>상태</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -149,6 +170,8 @@
               <th>CVR</th>
               <th>CPA</th>
               <th>ROAS</th>
+              <th>상태</th>
+              <th></th>
             </tr>
           </thead>
           <tbody></tbody>
