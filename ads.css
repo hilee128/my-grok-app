@@ -74,6 +74,66 @@ body {
   font-size: 0.95rem;
 }
 
+.mode-badge {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.mode-badge.live {
+  background: var(--mint-soft);
+  color: #2d8f6a;
+}
+
+.platform-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.platform-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.platform-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.platform-btn.active {
+  background: linear-gradient(135deg, var(--accent) 0%, #c9bdf0 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+.platform-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.platform-tag.meta { background: #e8f0ff; color: #4267b2; }
+.platform-tag.youtube { background: #ffe8e8; color: #cc0000; }
+.platform-tag.tiktok { background: #f0f0f0; color: #010101; }
+
 .header-actions {
   display: flex;
   gap: 10px;

@@ -21,7 +21,8 @@
       <div>
         <p class="eyebrow">Performance Marketing Report</p>
         <h1>광고 성과 인사이트</h1>
-        <p class="subtitle">광고주를 위한 실시간 캠페인 효율 분석</p>
+        <p class="subtitle">메타 · 유튜브 · 틱톡 통합 캠페인 효율 분석</p>
+        <p class="mode-badge" id="mode-badge">데모 모드</p>
       </div>
       <div class="header-actions">
         <label class="upload-btn">
@@ -57,6 +58,13 @@
       <p id="summary-text"></p>
     </section>
 
+    <section class="platform-filters" id="platform-filters">
+      <button class="platform-btn active" data-platform="all">전체</button>
+      <button class="platform-btn" data-platform="meta">메타</button>
+      <button class="platform-btn" data-platform="youtube">유튜브</button>
+      <button class="platform-btn" data-platform="tiktok">틱톡</button>
+    </section>
+
     <section class="kpi-grid" id="kpi-grid"></section>
 
     <section class="panel warning-panel" id="warning-panel" hidden>
@@ -69,12 +77,12 @@
         <table id="warning-table">
           <thead>
             <tr>
+              <th>매체</th>
+              <th>브랜드</th>
               <th>캠페인</th>
               <th>타겟</th>
               <th>광고비</th>
-              <th>매출</th>
               <th>ROAS</th>
-              <th>CPA</th>
               <th>상태</th>
             </tr>
           </thead>
@@ -162,13 +170,12 @@
         <table id="campaign-table">
           <thead>
             <tr>
+              <th>매체</th>
+              <th>브랜드</th>
               <th>캠페인</th>
               <th>타겟</th>
               <th>광고비</th>
               <th>매출</th>
-              <th>CTR</th>
-              <th>CVR</th>
-              <th>CPA</th>
               <th>ROAS</th>
               <th>상태</th>
               <th></th>

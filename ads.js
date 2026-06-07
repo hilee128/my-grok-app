@@ -1,8 +1,12 @@
 const CSV_PATH = "ad_performance_raw.csv";
+const JSON_PATH = "data/campaigns.json";
+const API_BASE = "http://127.0.0.1:8000";
 const SPEND_MIN = 500_000;
 const ROAS_MAX = 150;
 const AUTO_CUTOFF_KEY = "ads-auto-cutoff-enabled";
 const MANUAL_RESUME_KEY = "ads-manual-resume";
+
+const PLATFORM_LABELS = { meta: "메타", youtube: "유튜브", tiktok: "틱톡", all: "전체" };
 
 const loading = document.getElementById("loading");
 const summaryBanner = document.getElementById("summary-banner");
@@ -11,6 +15,7 @@ const warningPanel = document.getElementById("warning-panel");
 const warningCount = document.getElementById("warning-count");
 const dataSource = document.getElementById("data-source");
 const generatedAt = document.getElementById("generated-at");
+const modeBadge = document.getElementById("mode-badge");
 const autoCutoffToggle = document.getElementById("auto-cutoff-toggle");
 const autoCutoffStatus = document.getElementById("auto-cutoff-status");
 const autoPauseBanner = document.getElementById("auto-pause-banner");
@@ -18,7 +23,10 @@ const autoPauseTitle = document.getElementById("auto-pause-title");
 const autoPauseDesc = document.getElementById("auto-pause-desc");
 
 let currentRows = [];
-let currentSource = CSV_PATH;
+let currentSource = JSON_PATH;
+let currentPlatform = "all";
+let apiAvailable = false;
+let dataMode = "demo";
 
 function showLoading(show) {
   loading.classList.toggle("hidden", !show);
@@ -29,11 +37,16 @@ function formatWon(value) {
 }
 
 function formatPct(value, digits = 1) {
-  return `${value.toFixed(digits)}%`;
+  return `${(value || 0).toFixed(digits)}%`;
+}
+
+function platformTag(platform) {
+  const label = PLATFORM_LABELS[platform] || platform;
+  return `<span class="platform-tag ${platform}">${label}</span>`;
 }
 
 function campaignKey(row) {
-  return `${row.Campaign_Name}::${row.Target_Segment}`;
+  return `${row.Platform || "legacy"}::${row.Campaign_ID || row.Campaign_Name}::${row.Target_Segment}`;
 }
 
 function isAutoCutoffEnabled() {
@@ -53,52 +66,60 @@ function saveManualResumeSet(set) {
   localStorage.setItem(MANUAL_RESUME_KEY, JSON.stringify([...set]));
 }
 
-function shouldAutoPause(row, autoEnabled, manualResume) {
-  if (!autoEnabled) return false;
-  if (manualResume.has(campaignKey(row))) return false;
-  return row.Spend >= SPEND_MIN && row.ROAS < ROAS_MAX;
-}
+function normalizeRow(row) {
+  const spend = Number(row.Spend || 0);
+  const revenue = Number(row.Revenue || 0);
+  const impressions = Number(row.Impressions || 0);
+  const clicks = Number(row.Clicks || 0);
+  const conversions = Number(row.Conversions || 1);
+  const ctr = row.CTR ?? (impressions ? (clicks / impressions) * 100 : 0);
+  const cvr = row.CVR ?? (clicks ? (conversions / clicks) * 100 : 0);
+  const cpa = row.CPA ?? (conversions ? spend / conversions : 0);
+  const roas = row.ROAS ?? (spend ? (revenue / spend) * 100 : 0);
 
-function parseCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  const headers = lines[0].replace(/^\uFEFF/, "").split(",");
-
-  return lines.slice(1).map((line) => {
-    const values = line.split(",");
-    const row = {};
-    headers.forEach((h, i) => {
-      const val = values[i] ?? "";
-      row[h.trim()] = ["Impressions", "Clicks", "Spend", "Conversions", "Revenue"].includes(h.trim())
-        ? Number(val)
-        : val.trim();
-    });
-    return row;
-  });
-}
-
-function addMetrics(rows) {
-  return rows.map((row) => {
-    const ctr = (row.Clicks / row.Impressions) * 100;
-    const cvr = (row.Conversions / row.Clicks) * 100;
-    const cpa = row.Spend / row.Conversions;
-    const roas = (row.Revenue / row.Spend) * 100;
-    return { ...row, CTR: ctr, CVR: cvr, CPA: cpa, ROAS: roas };
-  });
+  return {
+    Platform: row.Platform || "legacy",
+    Brand: row.Brand || "-",
+    Campaign_ID: row.Campaign_ID || "",
+    Campaign_Name: row.Campaign_Name || "",
+    Target_Segment: row.Target_Segment || "",
+    Impressions: impressions,
+    Clicks: clicks,
+    Spend: spend,
+    Conversions: conversions,
+    Revenue: revenue,
+    Status: row.Status || "ACTIVE",
+    CTR: ctr,
+    CVR: cvr,
+    CPA: cpa,
+    ROAS: roas,
+  };
 }
 
 function applyBudgetStatus(rows) {
   const autoEnabled = isAutoCutoffEnabled();
   const manualResume = getManualResumeSet();
 
-  return rows.map((row) => ({
-    ...row,
-    budgetPaused: shouldAutoPause(row, autoEnabled, manualResume),
-  }));
+  return rows.map((row) => {
+    const alreadyPaused = row.Status === "PAUSED";
+    const shouldPause =
+      !alreadyPaused &&
+      autoEnabled &&
+      !manualResume.has(campaignKey(row)) &&
+      row.Spend >= SPEND_MIN &&
+      row.ROAS < ROAS_MAX;
+
+    return { ...row, budgetPaused: alreadyPaused || shouldPause };
+  });
+}
+
+function filterByPlatform(rows) {
+  if (currentPlatform === "all") return rows;
+  return rows.filter((r) => r.Platform === currentPlatform);
 }
 
 function groupBySegment(rows) {
   const map = new Map();
-
   rows.forEach((row) => {
     const key = row.Target_Segment;
     if (!map.has(key)) {
@@ -117,9 +138,8 @@ function groupBySegment(rows) {
     }
     const agg = map.get(key);
     agg.campaigns += 1;
-    if (row.budgetPaused) {
-      agg.pausedCampaigns += 1;
-    } else {
+    if (row.budgetPaused) agg.pausedCampaigns += 1;
+    else {
       agg.activeCampaigns += 1;
       agg.activeSpend += row.Spend;
       agg.Impressions += row.Impressions;
@@ -139,37 +159,28 @@ function groupBySegment(rows) {
   }));
 }
 
-function getWasteCampaigns(rows) {
-  return rows
-    .filter((r) => r.Spend >= SPEND_MIN && r.ROAS < ROAS_MAX)
-    .sort((a, b) => a.ROAS - b.ROAS);
+function getWaste(rows) {
+  return rows.filter((r) => r.Spend >= SPEND_MIN && r.ROAS < ROAS_MAX);
 }
 
-function getPausedCampaigns(rows) {
-  return rows.filter((r) => r.budgetPaused);
-}
-
-function buildSummary(paused, activeRows, topCpa, topRoas) {
+function buildSummary(paused, activeRows) {
   const activeSpend = activeRows.reduce((s, r) => s + r.Spend, 0);
   const activeRevenue = activeRows.reduce((s, r) => s + r.Revenue, 0);
-  const totalRoas = activeSpend > 0 ? (activeRevenue / activeSpend) * 100 : 0;
-  const savedSpend = paused.reduce((s, r) => s + r.Spend, 0);
+  const roas = activeSpend > 0 ? (activeRevenue / activeSpend) * 100 : 0;
+  const saved = paused.reduce((s, r) => s + r.Spend, 0);
+  const modeLabel = dataMode === "live" ? "실연동" : "데모";
 
-  const bestRoas = topRoas[0]?.Target_Segment ?? "-";
-  const bestCpa = topCpa[0]?.Target_Segment ?? "-";
-
-  let pauseNote = "";
+  let note = "";
   if (isAutoCutoffEnabled() && paused.length) {
-    pauseNote = `저효율 ${paused.length}건 예산 자동 중단(절감 ${formatWon(savedSpend)}), `;
-  } else if (!isAutoCutoffEnabled()) {
-    pauseNote = "자동 중단 OFF 상태 — 수동 예산 조정 필요, ";
+    note = `저효율 ${paused.length}건 예산 자동 중단(절감 ${formatWon(saved)}). `;
   }
 
-  return (
-    `운영 중 ROAS ${formatPct(totalRoas)} 기준, ` +
-    `'${bestRoas}' 세그먼트 예산 확대·'${bestCpa}' 세그먼트 벤치마킹 권장. ` +
-    `${pauseNote}총 운영 광고비 ${formatWon(activeSpend)} 대비 수익 극대화 액션 우선.`
-  );
+  return `${modeLabel} · ${PLATFORM_LABELS[currentPlatform] || "전체"} · 운영 ROAS ${formatPct(roas)}. ${note}메타·유튜브·틱톡 통합 모니터링 중.`;
+}
+
+function renderModeBadge() {
+  modeBadge.textContent = dataMode === "live" ? "실연동 API" : "데모 모드 (3매체)";
+  modeBadge.className = `mode-badge${dataMode === "live" ? " live" : ""}`;
 }
 
 function renderAutoCutoffBar(paused) {
@@ -179,66 +190,35 @@ function renderAutoCutoffBar(paused) {
   autoCutoffStatus.className = `badge ${enabled ? "badge-warn" : "badge-accent"}`;
 
   autoPauseBanner.hidden = false;
-
   if (enabled && paused.length) {
     const saved = paused.reduce((s, r) => s + r.Spend, 0);
     autoPauseBanner.className = "auto-pause-banner";
     autoPauseTitle.textContent = `${paused.length}개 캠페인 예산이 자동으로 꺼졌습니다`;
-    autoPauseDesc.textContent =
-      `ROAS ${ROAS_MAX}% 미만 · 광고비 ${formatWon(SPEND_MIN)} 이상 조건 충족. ` +
-      `절감 예상액 ${formatWon(saved)} · 아래 표에서 개별 재개 가능`;
+    autoPauseDesc.textContent = apiAvailable
+      ? `API 연동으로 실제 중단 요청 가능 · 절감 예상 ${formatWon(saved)}`
+      : `브라우저 시뮬레이션 · API 서버 실행 시 실제 매체 연동 · 절감 ${formatWon(saved)}`;
   } else if (enabled) {
     autoPauseBanner.className = "auto-pause-banner auto-pause-banner--ok";
     autoPauseTitle.textContent = "자동 중단 규칙 활성화 중";
-    autoPauseDesc.textContent = "현재 조건에 해당하는 저효율 캠페인이 없습니다.";
+    autoPauseDesc.textContent = "현재 필터·조건에 해당하는 저효율 캠페인이 없습니다.";
   } else {
     autoPauseBanner.className = "auto-pause-banner auto-pause-banner--off";
     autoPauseTitle.textContent = "예산 자동 중단이 꺼져 있습니다";
-    autoPauseDesc.textContent = "토글을 켜면 저효율 캠페인 예산이 자동으로 OFF 됩니다.";
+    autoPauseDesc.textContent = "토글을 켜면 저효율 캠페인 예산이 자동 OFF 됩니다.";
   }
 }
 
 function renderKPIs(allRows, activeRows, paused) {
-  const totalSpend = allRows.reduce((s, r) => s + r.Spend, 0);
   const activeSpend = activeRows.reduce((s, r) => s + r.Spend, 0);
-  const activeRevenue = activeRows.reduce((s, r) => s + r.Revenue, 0);
   const savedSpend = paused.reduce((s, r) => s + r.Spend, 0);
-  const totalRoas = activeSpend > 0 ? (activeRevenue / activeSpend) * 100 : 0;
-  const avgCpa = activeRows.length
-    ? activeSpend / activeRows.reduce((s, r) => s + r.Conversions, 0)
-    : 0;
+  const activeRevenue = activeRows.reduce((s, r) => s + r.Revenue, 0);
+  const roas = activeSpend > 0 ? (activeRevenue / activeSpend) * 100 : 0;
 
   const cards = [
-    {
-      label: "운영 중 광고비",
-      value: formatWon(activeSpend),
-      sub: paused.length ? `중단 ${paused.length}건 제외` : "",
-      cls: "",
-    },
-    {
-      label: "절감 예산",
-      value: formatWon(savedSpend),
-      sub: isAutoCutoffEnabled() ? "자동 중단으로 차단" : "자동 중단 OFF",
-      cls: savedSpend > 0 ? "rose" : "",
-    },
-    {
-      label: "운영 ROAS",
-      value: formatPct(totalRoas),
-      sub: `전체 ${formatWon(totalSpend)} 대비`,
-      cls: "mint",
-    },
-    {
-      label: "운영 평균 CPA",
-      value: formatWon(avgCpa),
-      sub: `${activeRows.length}개 캠페인 운영 중`,
-      cls: "accent",
-    },
-    {
-      label: "전체 캠페인",
-      value: `${allRows.length}건`,
-      sub: `운영 ${activeRows.length} · 중단 ${paused.length}`,
-      cls: "",
-    },
+    { label: "운영 중 광고비", value: formatWon(activeSpend), sub: `${activeRows.length}건 운영`, cls: "" },
+    { label: "절감 예산", value: formatWon(savedSpend), sub: `${paused.length}건 중단`, cls: savedSpend ? "rose" : "" },
+    { label: "운영 ROAS", value: formatPct(roas), sub: PLATFORM_LABELS[currentPlatform], cls: "mint" },
+    { label: "분석 캠페인", value: `${allRows.length}건`, sub: "메타·유튜브·틱톡", cls: "accent" },
   ];
 
   document.getElementById("kpi-grid").innerHTML = cards
@@ -254,10 +234,9 @@ function renderKPIs(allRows, activeRows, paused) {
 }
 
 function statusCell(row) {
-  if (row.budgetPaused) {
-    return `<span class="status-badge paused">예산 OFF</span>`;
-  }
-  return `<span class="status-badge active">운영 중</span>`;
+  return row.budgetPaused
+    ? `<span class="status-badge paused">예산 OFF</span>`
+    : `<span class="status-badge active">운영 중</span>`;
 }
 
 function renderWarningTable(waste, paused) {
@@ -266,7 +245,6 @@ function renderWarningTable(waste, paused) {
     warningPanel.hidden = true;
     return;
   }
-
   warningPanel.hidden = false;
   warningCount.textContent = `${waste.length}건`;
   tbody.innerHTML = waste
@@ -274,13 +252,13 @@ function renderWarningTable(waste, paused) {
       const isPaused = paused.some((p) => campaignKey(p) === campaignKey(r));
       return `
       <tr class="${isPaused ? "row-paused" : ""}">
+        <td>${platformTag(r.Platform)}</td>
+        <td>${r.Brand}</td>
         <td>${r.Campaign_Name}</td>
         <td>${r.Target_Segment}</td>
         <td>${formatWon(r.Spend)}</td>
-        <td>${formatWon(r.Revenue)}</td>
         <td class="roas-low">${formatPct(r.ROAS)}</td>
-        <td>${formatWon(r.CPA)}</td>
-        <td>${isPaused ? '<span class="status-badge paused">자동 중단됨</span>' : '<span class="status-badge active">운영 중</span>'}</td>
+        <td>${isPaused ? '<span class="status-badge paused">자동 중단</span>' : statusCell(r)}</td>
       </tr>`;
     })
     .join("");
@@ -295,8 +273,7 @@ function renderTopTable(tableId, items, type) {
   tbody.innerHTML = items
     .map((r, i) => {
       if (type === "cpa") {
-        return `
-        <tr>
+        return `<tr>
           <td><span class="rank ${rankClass(i)}">${i + 1}</span></td>
           <td>${r.Target_Segment}</td>
           <td>${formatWon(r.CPA)}</td>
@@ -304,27 +281,24 @@ function renderTopTable(tableId, items, type) {
           <td>${r.Conversions.toLocaleString()}건</td>
         </tr>`;
       }
-      return `
-        <tr>
-          <td><span class="rank ${rankClass(i)}">${i + 1}</span></td>
-          <td>${r.Target_Segment}</td>
-          <td class="roas-high">${formatPct(r.ROAS)}</td>
-          <td>${formatWon(r.CPA)}</td>
-          <td>${formatWon(r.Revenue)}</td>
-        </tr>`;
+      return `<tr>
+        <td><span class="rank ${rankClass(i)}">${i + 1}</span></td>
+        <td>${r.Target_Segment}</td>
+        <td class="roas-high">${formatPct(r.ROAS)}</td>
+        <td>${formatWon(r.CPA)}</td>
+        <td>${formatWon(r.Revenue)}</td>
+      </tr>`;
     })
     .join("");
 }
 
 function renderSegmentTable(segments) {
-  const tbody = document.querySelector("#segment-table tbody");
-  tbody.innerHTML = segments
+  document.querySelector("#segment-table tbody").innerHTML = segments
     .sort((a, b) => b.ROAS - a.ROAS)
     .map(
-      (s) => `
-      <tr>
+      (s) => `<tr>
         <td><strong>${s.Target_Segment}</strong></td>
-        <td>${s.activeCampaigns}건${s.pausedCampaigns ? ` <span class="status-badge paused">-${s.pausedCampaigns}</span>` : ""}</td>
+        <td>${s.activeCampaigns}건</td>
         <td>${formatWon(s.activeSpend)}</td>
         <td>${formatWon(s.Revenue)}</td>
         <td>${s.Conversions.toLocaleString()}건</td>
@@ -341,29 +315,22 @@ function renderCampaignTable(rows) {
   const active = rows.filter((r) => !r.budgetPaused);
   const paused = rows.filter((r) => r.budgetPaused);
   document.getElementById("campaign-count").textContent =
-    `전체 ${rows.length}건 · 운영 ${active.length} · 중단 ${paused.length}`;
+    `전체 ${rows.length} · 운영 ${active.length} · 중단 ${paused.length}`;
 
-  const tbody = document.querySelector("#campaign-table tbody");
-  tbody.innerHTML = [...rows]
-    .sort((a, b) => {
-      if (a.budgetPaused !== b.budgetPaused) return a.budgetPaused ? 1 : -1;
-      return b.ROAS - a.ROAS;
-    })
+  document.querySelector("#campaign-table tbody").innerHTML = [...rows]
+    .sort((a, b) => (a.budgetPaused === b.budgetPaused ? b.ROAS - a.ROAS : a.budgetPaused ? 1 : -1))
     .map((r) => {
-      const roasCls =
-        r.ROAS < ROAS_MAX && r.Spend >= SPEND_MIN ? "roas-low" : r.ROAS >= 200 ? "roas-high" : "";
+      const roasCls = r.ROAS < ROAS_MAX && r.Spend >= SPEND_MIN ? "roas-low" : r.ROAS >= 200 ? "roas-high" : "";
       const resumeBtn = r.budgetPaused
         ? `<button class="resume-btn" data-key="${campaignKey(r)}">예산 재개</button>`
         : "";
-      return `
-      <tr class="${r.budgetPaused ? "row-paused" : ""}">
+      return `<tr class="${r.budgetPaused ? "row-paused" : ""}">
+        <td>${platformTag(r.Platform)}</td>
+        <td>${r.Brand}</td>
         <td>${r.Campaign_Name}</td>
         <td>${r.Target_Segment}</td>
         <td>${formatWon(r.Spend)}</td>
         <td>${formatWon(r.Revenue)}</td>
-        <td>${formatPct(r.CTR, 2)}</td>
-        <td>${formatPct(r.CVR, 2)}</td>
-        <td>${formatWon(r.CPA)}</td>
         <td class="${roasCls}">${formatPct(r.ROAS)}</td>
         <td>${statusCell(r)}</td>
         <td>${resumeBtn}</td>
@@ -371,7 +338,7 @@ function renderCampaignTable(rows) {
     })
     .join("");
 
-  tbody.querySelectorAll(".resume-btn").forEach((btn) => {
+  document.querySelectorAll(".resume-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const set = getManualResumeSet();
       set.add(btn.dataset.key);
@@ -385,21 +352,21 @@ function renderDashboard(rows, sourceName) {
   currentRows = rows;
   currentSource = sourceName;
 
-  const enriched = applyBudgetStatus(addMetrics(rows));
+  const filtered = filterByPlatform(rows.map(normalizeRow));
+  const enriched = applyBudgetStatus(filtered);
   const activeRows = enriched.filter((r) => !r.budgetPaused);
-  const paused = getPausedCampaigns(enriched);
+  const paused = enriched.filter((r) => r.budgetPaused);
+  const waste = getWaste(enriched);
   const segments = groupBySegment(enriched);
-  const waste = getWasteCampaigns(enriched);
 
   const topCpa = [...segments].filter((s) => s.Conversions > 0).sort((a, b) => a.CPA - b.CPA).slice(0, 3);
   const topRoas = [...segments].filter((s) => s.activeSpend > 0).sort((a, b) => b.ROAS - a.ROAS).slice(0, 3);
 
+  renderModeBadge();
   renderAutoCutoffBar(paused);
   renderKPIs(enriched, activeRows, paused);
-
-  summaryText.textContent = buildSummary(paused, activeRows, topCpa, topRoas);
+  summaryText.textContent = buildSummary(paused, activeRows);
   summaryBanner.hidden = false;
-
   renderWarningTable(waste, paused);
   renderTopTable("top-cpa-table", topCpa, "cpa");
   renderTopTable("top-roas-table", topRoas, "roas");
@@ -410,35 +377,77 @@ function renderDashboard(rows, sourceName) {
   generatedAt.textContent = new Date().toLocaleString("ko-KR");
 }
 
-async function loadDefaultCSV() {
-  const res = await fetch(CSV_PATH);
-  if (!res.ok) throw new Error("CSV 파일을 불러올 수 없습니다.");
-  const text = await res.text();
-  return { rows: parseCSV(text), source: CSV_PATH };
+async function tryLoadAPI(autoPause) {
+  try {
+    const url = autoPause ? `${API_BASE}/api/auto-pause` : `${API_BASE}/api/analyze?auto_pause=false`;
+    const res = await fetch(url, { method: "POST", signal: AbortSignal.timeout(3000) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    apiAvailable = true;
+    dataMode = data.platform_status?.mode === "live" ? "live" : "demo";
+    return {
+      rows: data.campaigns || [],
+      source: `API (${dataMode})`,
+      summary: data.summary,
+    };
+  } catch {
+    apiAvailable = false;
+    return null;
+  }
 }
 
-function handleFileUpload(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        resolve({ rows: parseCSV(e.target.result), source: file.name });
-      } catch (err) {
-        reject(err);
-      }
-    };
-    reader.onerror = () => reject(new Error("파일 읽기 실패"));
-    reader.readAsText(file, "UTF-8");
+async function loadJSON() {
+  const res = await fetch(JSON_PATH);
+  if (!res.ok) throw new Error("JSON 없음");
+  const data = await res.json();
+  dataMode = data.mode === "live" ? "live" : "demo";
+  return { rows: data.campaigns, source: JSON_PATH };
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].replace(/^\uFEFF/, "").split(",");
+  return lines.slice(1).map((line) => {
+    const values = line.split(",");
+    const row = {};
+    headers.forEach((h, i) => {
+      const key = h.trim();
+      const val = values[i] ?? "";
+      row[key] = ["Impressions", "Clicks", "Spend", "Conversions", "Revenue"].includes(key)
+        ? Number(val)
+        : val.trim();
+    });
+    row.Platform = row.Platform || "legacy";
+    row.Brand = row.Brand || "-";
+    return row;
   });
 }
 
-async function init(sourceFile) {
+async function loadCSV() {
+  const res = await fetch(CSV_PATH);
+  if (!res.ok) throw new Error("CSV 없음");
+  return { rows: parseCSV(await res.text()), source: CSV_PATH };
+}
+
+async function init(sourceFile, forceAutoPause = false) {
   showLoading(true);
   try {
-    const { rows, source } = sourceFile
-      ? await handleFileUpload(sourceFile)
-      : await loadDefaultCSV();
-    renderDashboard(rows, source);
+    let payload = null;
+
+    if (!sourceFile) {
+      payload = await tryLoadAPI(forceAutoPause && isAutoCutoffEnabled());
+      if (!payload) payload = await loadJSON();
+    }
+
+    if (sourceFile) {
+      const text = await sourceFile.text();
+      payload = { rows: parseCSV(text), source: sourceFile.name };
+    }
+
+    if (!payload) payload = await loadCSV();
+
+    renderDashboard(payload.rows, payload.source);
+    if (payload.summary) summaryText.textContent = payload.summary;
   } catch (err) {
     summaryText.textContent = `오류: ${err.message}`;
     summaryBanner.hidden = false;
@@ -447,14 +456,25 @@ async function init(sourceFile) {
   }
 }
 
-autoCutoffToggle.addEventListener("change", () => {
+document.querySelectorAll(".platform-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".platform-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentPlatform = btn.dataset.platform;
+    renderDashboard(currentRows, currentSource);
+  });
+});
+
+autoCutoffToggle.addEventListener("change", async () => {
   localStorage.setItem(AUTO_CUTOFF_KEY, String(autoCutoffToggle.checked));
-  if (currentRows.length) {
+  if (apiAvailable && autoCutoffToggle.checked) {
+    await init(null, true);
+  } else if (currentRows.length) {
     renderDashboard(currentRows, currentSource);
   }
 });
 
-document.getElementById("refresh-btn").addEventListener("click", () => init());
+document.getElementById("refresh-btn").addEventListener("click", () => init(null, isAutoCutoffEnabled()));
 document.getElementById("csv-upload").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (file) init(file);
