@@ -7,14 +7,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nav.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav class="page-nav">
-    <span class="page-nav-current">투두리스트</span>
-    <a href="ads.html" class="page-nav-link">광고 성과 대시보드</a>
-  </nav>
-  <div class="app">
+  <div class="page-wrap">
+    <nav class="top-nav">
+      <span class="nav-current">투두리스트</span>
+      <a href="ads.html" class="nav-link">광고 성과 대시보드</a>
+    </nav>
+    <div class="app">
     <header class="header">
       <div class="header-title">
         <img src="todo-icon.png" alt="" class="header-icon" width="44" height="44">
@@ -51,6 +53,7 @@
       <span class="count" id="count"></span>
       <button class="clear-btn" id="clear-completed" type="button">완료 항목 삭제</button>
     </footer>
+    </div>
   </div>
 
   <script src="script.js"></script>

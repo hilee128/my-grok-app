@@ -25,34 +25,6 @@
   --transition: 0.2s ease;
 }
 
-.page-nav {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  gap: 8px;
-  font-size: 0.8rem;
-  z-index: 10;
-}
-
-.page-nav-link {
-  color: #8b7bc7;
-  text-decoration: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
-.page-nav-link:hover {
-  background: var(--accent-soft);
-}
-
-.page-nav-current {
-  color: var(--text-muted);
-  padding: 6px 4px;
-}
-
 body {
   font-family: "DM Sans", system-ui, sans-serif;
   background: var(--bg);
@@ -62,11 +34,18 @@ body {
     radial-gradient(ellipse 50% 40% at 50% 50%, var(--rose-soft) 0%, transparent 70%);
   min-height: 100dvh;
   color: var(--text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
   line-height: 1.5;
+}
+
+.page-wrap {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .app {

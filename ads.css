@@ -44,32 +44,6 @@ body {
   padding: 24px 20px 48px;
 }
 
-.top-nav {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  font-size: 0.85rem;
-}
-
-.nav-link {
-  color: var(--accent-deep);
-  text-decoration: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  transition: background 0.2s;
-}
-
-.nav-link:hover {
-  background: var(--accent-soft);
-}
-
-.nav-current {
-  color: var(--text-muted);
-}
-
 .dash-header {
   display: flex;
   align-items: flex-start;

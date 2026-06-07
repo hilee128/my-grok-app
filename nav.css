@@ -1,0 +1,27 @@
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+}
+
+.nav-link {
+  color: #8b7bc7;
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(184, 169, 232, 0.22);
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background: #ede8f8;
+}
+
+.nav-current {
+  color: #8f86a3;
+  white-space: nowrap;
+}
