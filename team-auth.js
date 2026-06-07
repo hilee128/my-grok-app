@@ -1,5 +1,15 @@
 const API_BASE = window.location.origin;
 const TOKEN_KEY = "team_token";
+const TEAM_APP_URL = "https://my-grok-app-production.up.railway.app";
+
+function fetchWithTimeout(url, options = {}, ms = 8000) {
+  if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+    return fetch(url, { ...options, signal: AbortSignal.timeout(ms) });
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
 
 function getTeamToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -21,10 +31,15 @@ function authHeaders(extra = {}) {
 }
 
 async function apiFetch(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: authHeaders(options.headers || {}),
-  });
+  const { timeoutMs, ...rest } = options;
+  const res = await fetchWithTimeout(
+    `${API_BASE}${path}`,
+    {
+      ...rest,
+      headers: authHeaders(rest.headers || {}),
+    },
+    timeoutMs || 8000
+  );
   if (res.status === 401) {
     clearTeamToken();
     if (!window.location.pathname.endsWith("login.html")) {
@@ -37,7 +52,7 @@ async function apiFetch(path, options = {}) {
 
 async function isTeamApiAvailable() {
   try {
-    const res = await fetch(`${API_BASE}/api/auth/required`, { signal: AbortSignal.timeout(5000) });
+    const res = await fetchWithTimeout(`${API_BASE}/api/auth/required`, {}, 5000);
     if (!res.ok) return false;
     await res.json();
     return true;
@@ -48,7 +63,7 @@ async function isTeamApiAvailable() {
 
 async function ensureTeamAuth() {
   try {
-    const res = await fetch(`${API_BASE}/api/auth/required`, { signal: AbortSignal.timeout(5000) });
+    const res = await fetchWithTimeout(`${API_BASE}/api/auth/required`, {}, 5000);
     if (!res.ok) return;
     const data = await res.json();
     if (!data.required) return;

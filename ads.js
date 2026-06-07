@@ -1,6 +1,7 @@
 const CSV_PATH = "ad_performance_raw.csv";
 const JSON_PATH = "data/campaigns.json";
 const API_BASE = window.location.origin;
+const TEAM_APP_URL = "https://my-grok-app-production.up.railway.app";
 const SPEND_MIN = 500_000;
 const ROAS_MAX = 150;
 const AUTO_CUTOFF_KEY = "ads-auto-cutoff-enabled";
@@ -383,7 +384,7 @@ function renderDashboard(rows, sourceName) {
 async function tryLoadAPI(autoPause) {
   try {
     const url = autoPause ? `/api/auto-pause` : `/api/analyze?auto_pause=false`;
-    const res = await apiFetch(url, { method: "POST", signal: AbortSignal.timeout(8000) });
+    const res = await apiFetch(url, { method: "POST", timeoutMs: 8000 });
     if (!res.ok) return null;
     const data = await res.json();
     apiAvailable = true;
@@ -457,7 +458,10 @@ async function init(sourceFile, forceAutoPause = false) {
         : payload.summary;
     }
   } catch (err) {
-    summaryText.textContent = `오류: ${err.message}`;
+    const onStaticHost = !apiAvailable && !window.location.hostname.includes("railway.app");
+    summaryText.textContent = onStaticHost
+      ? `데모 데이터를 불러오지 못했습니다. 팀 대시보드는 ${TEAM_APP_URL}/login.html 에서 이용하세요.`
+      : `오류: ${err.message}`;
     summaryBanner.hidden = false;
   } finally {
     showLoading(false);

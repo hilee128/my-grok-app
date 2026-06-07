@@ -9,7 +9,7 @@ from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -138,7 +138,7 @@ def pause_campaign(body: PauseRequest, _: None = Depends(require_team_auth)):
 
 @app.get("/")
 def index():
-    return FileResponse(ROOT / "ads.html")
+    return RedirectResponse(url="/login.html", status_code=302)
 
 
 app.mount("/", StaticFiles(directory=ROOT, html=True), name="static")
