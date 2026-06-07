@@ -445,6 +445,53 @@ async function loadCSV() {
 async function init(sourceFile, forceAutoPause = false) {
   setupElements();
   safeShowLoading(true);
+
+  // Attach listeners only once, after elements are ready
+  if (!window._adsListenersAttached) {
+    document.querySelectorAll(".platform-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".platform-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentPlatform = btn.dataset.platform;
+        renderDashboard(currentRows, currentSource);
+      });
+    });
+
+    if (autoCutoffToggle) {
+      autoCutoffToggle.addEventListener("change", async () => {
+        localStorage.setItem(AUTO_CUTOFF_KEY, String(autoCutoffToggle.checked));
+        if (apiAvailable && autoCutoffToggle.checked) {
+          await init(null, true);
+        } else if (currentRows.length) {
+          renderDashboard(currentRows, currentSource);
+        }
+      });
+    }
+
+    const refreshBtn = document.getElementById("refresh-btn");
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", () => init(null, isAutoCutoffEnabled()));
+    }
+
+    const csvUpload = document.getElementById("csv-upload");
+    if (csvUpload) {
+      csvUpload.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) init(file);
+      });
+    }
+
+    const logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        clearTeamToken();
+        window.location.href = "login.html";
+      });
+    }
+
+    window._adsListenersAttached = true;
+  }
+
   try {
     let payload = null;
 
@@ -490,35 +537,6 @@ async function init(sourceFile, forceAutoPause = false) {
     safeShowLoading(false);
   }
 }
-
-document.querySelectorAll(".platform-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".platform-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    currentPlatform = btn.dataset.platform;
-    renderDashboard(currentRows, currentSource);
-  });
-});
-
-autoCutoffToggle.addEventListener("change", async () => {
-  localStorage.setItem(AUTO_CUTOFF_KEY, String(autoCutoffToggle.checked));
-  if (apiAvailable && autoCutoffToggle.checked) {
-    await init(null, true);
-  } else if (currentRows.length) {
-    renderDashboard(currentRows, currentSource);
-  }
-});
-
-document.getElementById("refresh-btn").addEventListener("click", () => init(null, isAutoCutoffEnabled()));
-document.getElementById("csv-upload").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (file) init(file);
-});
-
-document.getElementById("logout-btn")?.addEventListener("click", () => {
-  clearTeamToken();
-  window.location.href = "login.html";
-});
 
 ensureTeamAuth()
   .then(() => init())
