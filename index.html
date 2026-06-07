@@ -4,94 +4,179 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>my-grok-app | 광고 성과 자동 분석 데모</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nav.css">
+  <link rel="stylesheet" href="ads.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap');
+    /* Landing-specific tweaks to match dashboard aesthetic perfectly */
+    .landing-hero {
+      text-align: center;
+      padding: 40px 20px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .landing-hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .landing-hero p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 24px;
+      line-height: 1.5;
+    }
+    .landing-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .landing-buttons a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .landing-buttons .primary {
+      background: linear-gradient(135deg, var(--accent) 0%, #c9bdf0 100%);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 14px rgba(184, 169, 232, 0.35);
+    }
+    .landing-buttons .primary:hover {
+      transform: translateY(-1px);
+    }
+    .landing-buttons .secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .landing-buttons .secondary:hover {
+      transform: translateY(-1px);
+    }
+    .landing-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .landing-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .landing-features .kpi-card {
+      text-align: left;
+    }
+    .landing-features .kpi-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .landing-features .kpi-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .landing-footer-link {
+      text-align: center;
+      margin-top: 32px;
+    }
+    .landing-footer-link a {
+      color: var(--accent-deep);
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .landing-footer-link a:hover {
+      text-decoration: underline;
+    }
+    /* Ensure body/dashboard bg matches ads exactly */
     body {
-      font-family: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 70% 50% at 0% 0%, var(--accent-soft) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 45% at 100% 100%, var(--mint-soft) 0%, transparent 50%);
+    }
+    .dashboard {
+      padding-top: 0;
     }
   </style>
 </head>
-<body class="bg-[#f8f7f4] min-h-screen">
-  <div class="max-w-[1200px] mx-auto px-8 pt-8">
-    <!-- Nav -->
-    <div class="flex items-center gap-3 mb-10">
-      <a href="#" class="px-5 py-2 rounded-full text-sm font-semibold bg-black text-white">홈</a>
-      <a href="ads.html" class="px-5 py-2 rounded-full text-sm font-medium bg-[#f0efed] text-[#666]">광고 데모</a>
-      <a href="https://my-grok-app-production.up.railway.app/login.html" class="px-5 py-2 rounded-full text-sm font-medium bg-[#f0efed] text-[#666]">팀 대시보드</a>
-    </div>
+<body>
+  <div class="dashboard">
+    <!-- Exact same nav as ads.html for perfect consistency -->
+    <nav class="top-nav">
+      <span class="nav-current">홈</span>
+      <a href="ads.html" class="nav-link">광고 데모</a>
+      <a href="https://my-grok-app-production.up.railway.app/login.html" class="nav-link">팀 대시보드</a>
+    </nav>
 
-    <!-- Badge -->
-    <div class="flex justify-center mb-6">
-      <div class="inline-flex items-center gap-2 bg-[#f0e6ff] text-[#6b5ce0] text-xs font-semibold px-3 py-1 rounded-full">
-        <i class="fa-solid fa-robot"></i>
-        <span>Grok 빌드</span>
+    <!-- Hero / Intro matching dashboard polish -->
+    <div class="landing-hero">
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: var(--accent-soft); padding: 4px 12px; border-radius: 999px; margin-bottom: 12px;">
+        <i class="fa-solid fa-robot" style="color: var(--accent-deep);"></i>
+        <span style="font-size: 0.7rem; font-weight: 600; color: var(--accent-deep);">Grok 빌드</span>
       </div>
-    </div>
 
-    <!-- Hero -->
-    <div class="text-center max-w-2xl mx-auto">
-      <h1 class="text-5xl font-bold tracking-tighter mb-4">광고 성과 자동 분석 데모</h1>
-      <p class="text-[#666] text-lg mb-8">
+      <h1>광고 성과 자동 분석 데모</h1>
+      <p>
         CSV 하나만 넣으면 CTR · CVR · CPA · ROAS 자동 계산 + 예산 낭비 경고 + 세그먼트 Top 3
       </p>
 
-      <div class="flex justify-center gap-3">
-        <a href="ads.html" 
-           class="inline-flex items-center gap-2 bg-[#6366f1] hover:bg-[#5558e0] text-white font-semibold px-6 py-3 rounded-full text-sm transition-colors">
+      <div class="landing-buttons">
+        <a href="ads.html" class="primary">
           <i class="fa-solid fa-chart-line"></i>
           <span>광고 데모 바로 보기 (정적)</span>
         </a>
-        <a href="https://my-grok-app-production.up.railway.app/login.html" 
-           class="inline-flex items-center gap-2 border border-[#ddd] hover:bg-white font-semibold px-6 py-3 rounded-full text-sm bg-white transition-colors">
+        <a href="https://my-grok-app-production.up.railway.app/login.html" class="secondary">
           팀 대시보드 (Railway)
         </a>
       </div>
-      <p class="text-xs text-[#888] mt-3">
+      <p class="landing-note">
         정적 데모는 GitHub Pages에서 바로 실행됩니다. 데이터는 브라우저에서 처리.
       </p>
     </div>
 
-    <!-- Feature Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-16 max-w-5xl mx-auto">
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-[#f0f0f0]">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-green-500"><i class="fa-solid fa-check-circle"></i></span>
-          <span class="font-semibold">4대 지표 자동 계산</span>
-        </div>
-        <p class="text-sm text-[#666]">CTR, CVR, CPA, ROAS를 자동으로 계산하고 반올림 처리</p>
+    <!-- Feature cards using exact .kpi-card styles from ads.css for unification -->
+    <div class="landing-features">
+      <div class="kpi-card">
+        <h3><i class="fa-solid fa-check-circle" style="color: #4ade80;"></i> 4대 지표 자동 계산</h3>
+        <p>CTR, CVR, CPA, ROAS를 자동으로 계산하고 반올림 처리</p>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-[#f0f0f0]">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-yellow-500"><i class="fa-solid fa-trophy"></i></span>
-          <span class="font-semibold">타겟 세그먼트 Top 3</span>
-        </div>
-        <p class="text-sm text-[#666]">ROAS 기준으로 가장 효율 좋은 세그먼트 자동 추출</p>
+      <div class="kpi-card">
+        <h3><i class="fa-solid fa-trophy" style="color: #facc15;"></i> 타겟 세그먼트 Top 3</h3>
+        <p>ROAS 기준으로 가장 효율 좋은 세그먼트 자동 추출</p>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-[#f0f0f0]">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-orange-500"><i class="fa-solid fa-exclamation-triangle"></i></span>
-          <span class="font-semibold">예산 낭비 경고</span>
-        </div>
-        <p class="text-sm text-[#666]">광고비 50만↑ + ROAS 150% 미만 캠페인 최상단 표시</p>
+      <div class="kpi-card">
+        <h3><i class="fa-solid fa-exclamation-triangle" style="color: #fb923c;"></i> 예산 낭비 경고</h3>
+        <p>광고비 50만↑ + ROAS 150% 미만 캠페인 최상단 표시</p>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-[#f0f0f0]">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-blue-500"><i class="fa-solid fa-upload"></i></span>
-          <span class="font-semibold">CSV 업로드 지원</span>
-        </div>
-        <p class="text-sm text-[#666]">자신의 광고 데이터를 바로 업로드해서 테스트 가능</p>
+      <div class="kpi-card">
+        <h3><i class="fa-solid fa-upload" style="color: #60a5fa;"></i> CSV 업로드 지원</h3>
+        <p>자신의 광고 데이터를 바로 업로드해서 테스트 가능</p>
       </div>
     </div>
 
-    <div class="text-center mt-12">
-      <a href="ads.html" class="text-sm text-[#6366f1] hover:underline">
-        → 전체 광고 성과 대시보드 열기
-      </a>
+    <div class="landing-footer-link">
+      <a href="ads.html">→ 전체 광고 성과 대시보드 열기</a>
     </div>
   </div>
 </body>
