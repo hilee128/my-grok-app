@@ -599,8 +599,47 @@ tbody tr:hover {
     text-align: center;
   }
 
+  /* Make CPA/ROAS top3 horizontally scrollable on mobile (prevents layout shift/"moving").
+     CPA TOP 3 is shrunk (60%) so ROAS peeks on the right; scroll right to see full.
+     Visual scroll hint arrow on the right. */
   .two-col {
-    grid-template-columns: 1fr;
+    display: flex !important;
+    overflow-x: auto;
+    gap: 12px;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    scroll-behavior: smooth;
+    position: relative;
+  }
+
+  .two-col > section {
+    flex: 0 0 60%;
+    min-width: 240px;
+  }
+
+  .two-col > section:last-child {
+    flex: 0 0 95%;
+  }
+
+  .two-col .table-wrap table {
+    min-width: 220px;
+    font-size: 0.7rem;
+  }
+
+  .two-col::after {
+    content: "→";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
+    padding: 6px 10px 6px 14px;
+    font-size: 1.6rem;
+    color: var(--accent-deep);
+    pointer-events: none;
+    opacity: 0.75;
+    border-radius: 0 8px 8px 0;
+    font-weight: bold;
   }
 
   .kpi-grid {
@@ -672,5 +711,10 @@ tbody tr:hover {
   .header-actions .refresh-btn {
     font-size: 0.7rem;
     padding: 6px 10px;
+  }
+
+  .two-col > section {
+    flex: 0 0 88%;
+    min-width: 240px;
   }
 }

@@ -1,27 +1,27 @@
 .top-nav {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   margin-bottom: 16px;
-  font-size: 1rem;
+  font-size: 1.25rem;
   flex-wrap: wrap;
 }
 
 @media (max-width: 480px) {
   .top-nav {
-    gap: 8px;
-    font-size: 0.9rem;
+    gap: 10px;
+    font-size: 1.15rem;
   }
 
   .nav-link {
-    padding: 6px 12px;
+    padding: 10px 18px;
   }
 }
 
 .nav-link {
   color: #8b7bc7;
   text-decoration: none;
-  padding: 8px 16px;
+  padding: 12px 24px;
   border-radius: 8px;
   background: #ffffff;
   border: 1px solid rgba(184, 169, 232, 0.22);
@@ -40,7 +40,7 @@
 
 /* Larger icons in top nav */
 .top-nav i {
-  font-size: 1.6em;
+  font-size: 2.2em;
   margin-right: 8px;
-  vertical-align: -3px;
+  vertical-align: -5px;
 }
