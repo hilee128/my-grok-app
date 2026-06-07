@@ -8,65 +8,75 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #f9f8f6;
-      --surface: #fff;
-      --text: #1a1a1a;
-      --muted: #666;
-      --accent: #6366f1;
-    }
+    *, *::before, *::after { box-sizing: border-box; }
     body {
       font-family: 'DM Sans', system-ui, sans-serif;
-      background: var(--bg);
-      margin: 0;
+      background: #f9f8f6;
       padding: 40px 20px;
-      color: var(--text);
+      color: #1a1a1a;
+      min-height: 100dvh;
     }
-    .container {
-      max-width: 620px;
+    .page-wrap {
+      width: 100%;
+      max-width: 480px;
       margin: 0 auto;
     }
-    h1 {
-      font-size: 2rem;
-      font-weight: 800;
-      margin-bottom: 24px;
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
     }
-    .input-row {
+    .header-icon {
+      width: 44px;
+      height: 44px;
+    }
+    .header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .header-subtitle {
+      color: #888;
+      font-size: 0.9rem;
+      margin: 4px 0 20px;
+    }
+    .input-form {
       display: flex;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
-    input[type="text"] {
+    .todo-input {
       flex: 1;
-      padding: 14px 18px;
+      padding: 12px 16px;
       border: 2px solid #e5e3df;
       border-radius: 999px;
       font-size: 1rem;
       outline: none;
     }
-    input[type="text"]:focus {
-      border-color: var(--accent);
-    }
-    button {
-      padding: 14px 24px;
+    .add-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
       background: #1a1a1a;
       color: white;
       border: none;
-      border-radius: 999px;
-      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
     }
     .filters {
       display: flex;
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     .filter-btn {
-      padding: 6px 16px;
+      padding: 6px 14px;
       border-radius: 999px;
       border: 1px solid #e5e3df;
       background: #fff;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       cursor: pointer;
     }
     .filter-btn.active {
@@ -77,15 +87,15 @@
     .todo-list {
       list-style: none;
       padding: 0;
-      margin: 0;
+      margin: 0 0 20px;
     }
     .todo-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      background: var(--surface);
-      padding: 14px 18px;
-      border-radius: 16px;
+      background: #fff;
+      padding: 12px 16px;
+      border-radius: 14px;
       margin-bottom: 8px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     }
@@ -94,14 +104,15 @@
       color: #aaa;
     }
     .checkbox {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       border: 2px solid #ccc;
       border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      font-size: 13px;
       flex-shrink: 0;
     }
     .checkbox.checked {
@@ -113,51 +124,51 @@
       flex: 1;
       font-size: 0.95rem;
     }
-    .delete {
-      background: none;
-      border: none;
-      color: #999;
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
     .footer {
-      margin-top: 24px;
-      font-size: 0.85rem;
-      color: var(--muted);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 0.82rem;
+      color: #888;
     }
     .clear-btn {
       background: none;
       border: 1px solid #ddd;
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 999px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>투두리스트</h1>
-
-    <div class="input-row">
-      <input type="text" id="todo-input" placeholder="할 일을 입력하세요..." onkeypress="if(event.key === 'Enter') addTodo()">
-      <button onclick="addTodo()">추가</button>
+  <div class="page-wrap">
+    <div class="header">
+      <img src="todo-icon.png" alt="" class="header-icon" width="44" height="44">
+      <h1>오늘의 할 일</h1>
     </div>
+    <p class="header-subtitle">작은 일부터 차근차근 ✨</p>
+
+    <form class="input-form" id="todo-form" onsubmit="return false;">
+      <input type="text" id="todo-input" class="todo-input" placeholder="할 일을 입력하세요…" maxlength="120">
+      <button type="submit" class="add-btn" aria-label="추가">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </form>
 
     <div class="filters">
-      <button class="filter-btn active" onclick="setFilter('all')">전체</button>
-      <button class="filter-btn" onclick="setFilter('active')">진행 중</button>
-      <button class="filter-btn" onclick="setFilter('completed')">완료</button>
+      <button class="filter-btn active" data-filter="all">전체</button>
+      <button class="filter-btn" data-filter="active">진행 중</button>
+      <button class="filter-btn" data-filter="completed">완료</button>
     </div>
 
     <ul class="todo-list" id="todo-list"></ul>
 
     <div class="footer">
-      <span id="count"></span>
-      <button class="clear-btn" onclick="clearCompleted()">완료 항목 삭제</button>
+      <span class="count" id="count"></span>
+      <button class="clear-btn" id="clear-completed">완료 항목 삭제</button>
     </div>
   </div>
 
@@ -165,11 +176,11 @@
     let todos = JSON.parse(localStorage.getItem('todos') || '[]');
     let currentFilter = 'all';
 
-    function saveTodos() {
+    function save() {
       localStorage.setItem('todos', JSON.stringify(todos));
     }
 
-    function renderTodos() {
+    function render() {
       const list = document.getElementById('todo-list');
       list.innerHTML = '';
 
@@ -177,16 +188,13 @@
       if (currentFilter === 'active') filtered = todos.filter(t => !t.done);
       if (currentFilter === 'completed') filtered = todos.filter(t => t.done);
 
-      filtered.forEach((todo, index) => {
+      filtered.forEach((todo, i) => {
         const li = document.createElement('li');
         li.className = 'todo-item' + (todo.done ? ' done' : '');
-
         li.innerHTML = `
-          <div class="checkbox ${todo.done ? 'checked' : ''}" onclick="toggleTodo(${index})">
-            ${todo.done ? '✓' : ''}
-          </div>
+          <div class="checkbox ${todo.done ? 'checked' : ''}" onclick="toggle(${i})">${todo.done ? '✓' : ''}</div>
           <span class="title">${todo.text}</span>
-          <button class="delete" onclick="deleteTodo(${index})">×</button>
+          <button class="delete" onclick="remove(${i})">×</button>
         `;
         list.appendChild(li);
       });
@@ -194,43 +202,53 @@
       document.getElementById('count').textContent = `${todos.filter(t => !t.done).length}개 남음`;
     }
 
-    function addTodo() {
+    function add() {
       const input = document.getElementById('todo-input');
-      const text = input.value.trim();
-      if (!text) return;
-
-      todos.push({ text, done: false });
-      saveTodos();
+      const val = input.value.trim();
+      if (!val) return;
+      todos.push({ text: val, done: false });
+      save();
       input.value = '';
-      renderTodos();
+      render();
     }
 
-    function toggleTodo(index) {
-      todos[index].done = !todos[index].done;
-      saveTodos();
-      renderTodos();
+    function toggle(i) {
+      todos[i].done = !todos[i].done;
+      save();
+      render();
     }
 
-    function deleteTodo(index) {
-      todos.splice(index, 1);
-      saveTodos();
-      renderTodos();
+    function remove(i) {
+      todos.splice(i, 1);
+      save();
+      render();
     }
 
     function clearCompleted() {
       todos = todos.filter(t => !t.done);
-      saveTodos();
-      renderTodos();
+      save();
+      render();
     }
 
-    function setFilter(filter) {
-      currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      renderTodos();
-    }
+    // filters
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        render();
+      });
+    });
 
-    renderTodos();
+    document.getElementById('todo-form').addEventListener('submit', e => {
+      e.preventDefault();
+      add();
+    });
+
+    document.getElementById('clear-completed').addEventListener('click', clearCompleted);
+
+    // init
+    render();
   </script>
 </body>
 </html>

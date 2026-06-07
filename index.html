@@ -3,28 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>my-grok-app</title>
+  <title>my-grok-app | 광고 성과 자동 분석 데모</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nav.css">
   <style>
-    :root {
-      --bg: #f9f8f6;
-      --surface: #fff;
-      --text: #1a1a1a;
-      --muted: #666;
-      --accent: #6366f1;
-      --card-shadow: 0 4px 20px rgba(0,0,0,0.06);
-    }
     body {
       font-family: 'DM Sans', system-ui, sans-serif;
-      background: var(--bg);
+      background: #f9f8f6;
       margin: 0;
-      padding: 0;
-      color: var(--text);
+      color: #1a1a1a;
     }
     .container {
-      max-width: 1100px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 40px 20px;
     }
@@ -49,77 +41,79 @@
       color: #555;
       background: #f0efed;
     }
-    .nav a:hover {
-      background: #e5e3df;
-    }
     .hero {
       text-align: center;
-      margin-bottom: 60px;
+      margin-bottom: 50px;
     }
     .hero h1 {
-      font-size: 2.8rem;
+      font-size: 2.6rem;
       font-weight: 800;
-      margin: 0 0 12px;
+      margin-bottom: 12px;
       letter-spacing: -0.03em;
     }
     .hero p {
-      font-size: 1.1rem;
-      color: var(--muted);
+      font-size: 1.05rem;
+      color: #666;
       max-width: 520px;
-      margin: 0 auto;
+      margin: 0 auto 24px;
     }
-    .demos {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 24px;
-    }
-    .demo-card {
-      background: var(--surface);
-      border-radius: 20px;
-      padding: 28px 24px;
-      box-shadow: var(--card-shadow);
-      transition: transform 0.2s, box-shadow 0.2s;
+    .btn-group {
       display: flex;
-      flex-direction: column;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
-    .demo-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-    }
-    .demo-card h2 {
-      font-size: 1.35rem;
-      margin: 0 0 10px;
-    }
-    .demo-card p {
-      color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
-      flex: 1;
-    }
-    .demo-card .btn {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 10px 20px;
-      background: #1a1a1a;
-      color: white;
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
       border-radius: 999px;
       text-decoration: none;
       font-weight: 600;
-      font-size: 0.9rem;
-      align-self: flex-start;
+      font-size: 0.95rem;
     }
-    .demo-card .btn:hover {
-      background: #333;
-    }
-    .demo-card.ad {
-      border: 2px solid #6366f1;
-    }
-    .demo-card.ad .btn {
+    .btn-primary {
       background: #6366f1;
+      color: white;
+    }
+    .btn-secondary {
+      background: white;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .feature {
+      background: white;
+      border: 1px solid #eee;
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .feature h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+    .feature p {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0;
+    }
+    .links {
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .links a {
+      color: #6366f1;
+      text-decoration: none;
     }
     @media (max-width: 768px) {
       .hero h1 { font-size: 2rem; }
-      .demos { grid-template-columns: 1fr; }
+      .features { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -134,31 +128,42 @@
     </div>
 
     <div class="hero">
-      <h1>my-grok-app</h1>
-      <p>Grok으로 만든 실용적인 데모 컬렉션.<br>광고 분석 · 생산성 도구를 바로 체험해보세요.</p>
+      <div style="display: inline-flex; align-items: center; gap: 10px; background: #f0f0ff; padding: 4px 14px; border-radius: 999px; margin-bottom: 14px;">
+        <span style="background: #6366f1; color: white; font-size: 11px; padding: 2px 8px; border-radius: 999px;">Grok 빌드</span>
+      </div>
+      <h1>광고 성과 자동 분석 데모</h1>
+      <p>CSV 하나만 넣으면 CTR · CVR · CPA · ROAS 자동 계산 + 예산 낭비 경고 + 세그먼트 Top 3</p>
+
+      <div class="btn-group">
+        <a href="ads.html" class="btn btn-primary">📊 광고 데모 바로 보기 (정적)</a>
+        <a href="https://my-grok-app-production.up.railway.app/login.html" class="btn btn-secondary">팀 대시보드 (Railway)</a>
+      </div>
+      <p style="margin-top: 10px; font-size: 0.8rem; color: #888;">
+        정적 데모는 GitHub Pages에서 바로 실행. 데이터는 브라우저에서 처리.
+      </p>
     </div>
 
-    <div class="demos">
-      <!-- Ad Demo -->
-      <div class="demo-card ad">
-        <h2>📊 광고 성과 자동 분석 데모</h2>
-        <p>CSV 하나만 올리면 CTR, CVR, CPA, ROAS가 자동 계산되고, 예산 낭비 경고 + 세그먼트 Top 3까지 바로 나오는 정적 대시보드.</p>
-        <a href="ads.html" class="btn">데모 바로 열기 →</a>
+    <div class="features">
+      <div class="feature">
+        <h3>✅ 4대 지표 자동 계산</h3>
+        <p>CTR, CVR, CPA, ROAS를 자동으로 계산하고 반올림 처리</p>
       </div>
+      <div class="feature">
+        <h3>🏆 타겟 세그먼트 Top 3</h3>
+        <p>ROAS 기준으로 가장 효율 좋은 세그먼트 자동 추출</p>
+      </div>
+      <div class="feature">
+        <h3>⚠️ 예산 낭비 경고</h3>
+        <p>광고비 50만↑ + ROAS 150% 미만 캠페인 최상단 표시</p>
+      </div>
+      <div class="feature">
+        <h3>📤 CSV 업로드 지원</h3>
+        <p>자신의 광고 데이터를 바로 업로드해서 테스트 가능</p>
+      </div>
+    </div>
 
-      <!-- Todo -->
-      <div class="demo-card">
-        <h2>✅ 투두리스트</h2>
-        <p>간단하고 빠른 할 일 관리. 필터, 완료 처리, 로컬 저장 지원. 매일 쓰기 좋은 가벼운 버전.</p>
-        <a href="todo.html" class="btn">투두리스트 열기 →</a>
-      </div>
-
-      <!-- Planner -->
-      <div class="demo-card">
-        <h2>📅 주간 계획표</h2>
-        <p>7일 그리드 + 카테고리별 체크리스트. 주간 일정을 한눈에 보고, 매일 루틴을 관리할 수 있는 플래너.</p>
-        <a href="planner.html" class="btn">플래너 열기 →</a>
-      </div>
+    <div class="links">
+      <a href="ads.html">→ 전체 광고 성과 대시보드 열기</a>
     </div>
   </div>
 </body>
