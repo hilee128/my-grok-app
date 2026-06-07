@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주간 계획표</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f9f8f6;
+      --surface: #fff;
+      --text: #1a1a1a;
+      --muted: #666;
+    }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      padding: 24px 16px;
+      color: var(--text);
+      margin: 0;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+    .week {
+      color: #888;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .day {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 14px 12px;
+      min-height: 220px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      cursor: pointer;
+    }
+    .day:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .day-header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .day-name {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .day-date {
+      font-size: 0.72rem;
+      color: #999;
+    }
+    .task {
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+    .task-title {
+      font-weight: 600;
+    }
+    .task-sub {
+      font-size: 0.7rem;
+      color: #777;
+    }
+
+    /* Categories */
+    .c-work { background: #e4eeff; color: #2258cc; }
+    .c-health { background: #e4f5ec; color: #1d7a47; }
+    .c-creative { background: #ede8fb; color: #6c3bb8; }
+    .c-routine { background: #f0f0f0; color: #555; }
+    .c-personal { background: #fde8e4; color: #c0392b; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 20px;
+      font-size: 0.8rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+
+    /* Checklist */
+    .checklist-wrap {
+      max-width: 720px;
+    }
+    .day-selector {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .day-pill {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 2px solid #e5e3df;
+      background: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #777;
+      cursor: pointer;
+    }
+    .day-pill.selected {
+      border-color: #1a1a1a;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .checklist-section {
+      display: none;
+    }
+    .checklist-section.visible {
+      display: block;
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #efefef;
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      background: #fff;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      cursor: pointer;
+    }
+    .check-item.done {
+      opacity: 0.5;
+    }
+    .check-item.done .ci-title {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+    .ci-box {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 2px solid #ccc;
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+    .check-item.done .ci-box {
+      background: #4caf82;
+      border-color: #4caf82;
+      color: white;
+    }
+    .ci-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      flex: 1;
+    }
+    .ci-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .tag-work { background: #e4eeff; color: #2258cc; }
+    .tag-health { background: #e4f5ec; color: #1d7a47; }
+    .tag-creative { background: #ede8fb; color: #6c3bb8; }
+    .tag-routine { background: #f0f0f0; color: #555; }
+    .tag-personal { background: #fde8e4; color: #c0392b; }
+
+    .add-task-btn {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      background: #f0efed;
+      border: none;
+      border-radius: 999px;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>이번 주 계획표</h1>
+    <div class="week">2025년 6월 9일 ~ 6월 15일</div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#e4eeff"></span> Work</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#e4f5ec"></span> Health</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#ede8fb"></span> Creative</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#f0f0f0"></span> Routine</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#fde8e4"></span> Personal</div>
+    </div>
+
+    <div class="grid" id="week-grid"></div>
+
+    <div class="checklist-wrap">
+      <h2 style="margin-bottom:12px; font-size:1.1rem;">데일리 체크리스트</h2>
+      <div class="day-selector" id="day-selector"></div>
+
+      <div id="checklist-content"></div>
+    </div>
+  </div>
+
+  <script>
+    // Sample data + localStorage
+    let weekData = JSON.parse(localStorage.getItem('weekData')) || {
+      "2025-06-09": [{title: "기획 회의", category: "work"}, {title: "운동 30분", category: "health"}],
+      "2025-06-10": [{title: "콘텐츠 작성", category: "creative"}],
+      "2025-06-11": [],
+      "2025-06-12": [{title: "루틴 정리", category: "routine"}],
+      "2025-06-13": [{title: "개인 시간", category: "personal"}],
+      "2025-06-14": [],
+      "2025-06-15": []
+    };
+
+    let checklistData = JSON.parse(localStorage.getItem('checklistData')) || {};
+
+    const categories = ["work", "health", "creative", "routine", "personal"];
+    const categoryLabels = {
+      work: "Work",
+      health: "Health",
+      creative: "Creative",
+      routine: "Routine",
+      personal: "Personal"
+    };
+    const categoryColors = {
+      work: "#e4eeff",
+      health: "#e4f5ec",
+      creative: "#ede8fb",
+      routine: "#f0f0f0",
+      personal: "#fde8e4"
+    };
+
+    const days = ["월", "화", "수", "목", "금", "토", "일"];
+    const dates = ["2025-06-09", "2025-06-10", "2025-06-11", "2025-06-12", "2025-06-13", "2025-06-14", "2025-06-15"];
+
+    function saveData() {
+      localStorage.setItem('weekData', JSON.stringify(weekData));
+      localStorage.setItem('checklistData', JSON.stringify(checklistData));
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('week-grid');
+      grid.innerHTML = '';
+
+      dates.forEach((date, i) => {
+        const col = document.createElement('div');
+        col.className = 'day';
+        col.onclick = () => addTaskToDay(date);
+
+        const tasks = weekData[date] || [];
+        let tasksHTML = tasks.map((t, idx) => `
+          <div class="task" style="background:${categoryColors[t.category]}">
+            <div class="task-title">${t.title}</div>
+          </div>
+        `).join('');
+
+        col.innerHTML = `
+          <div class="day-header">
+            <div class="day-name">${days[i]}</div>
+            <div class="day-date">${date.slice(5)}</div>
+          </div>
+          ${tasksHTML || '<div style="color:#aaa; font-size:0.75rem; margin-top:8px;">+ 추가</div>'}
+        `;
+        grid.appendChild(col);
+      });
+    }
+
+    function addTaskToDay(date) {
+      const title = prompt('할 일을 입력하세요');
+      if (!title) return;
+
+      const cat = prompt('카테고리 (work/health/creative/routine/personal)') || 'routine';
+      if (!weekData[date]) weekData[date] = [];
+      weekData[date].push({ title, category: cat });
+      saveData();
+      renderGrid();
+    }
+
+    function renderChecklist(selectedDate = dates[0]) {
+      const selector = document.getElementById('day-selector');
+      selector.innerHTML = '';
+
+      dates.forEach((date, i) => {
+        const pill = document.createElement('div');
+        pill.className = 'day-pill' + (date === selectedDate ? ' selected' : '');
+        pill.textContent = days[i];
+        pill.onclick = () => renderChecklist(date);
+        selector.appendChild(pill);
+      });
+
+      const content = document.getElementById('checklist-content');
+      content.innerHTML = '';
+
+      if (!checklistData[selectedDate]) {
+        checklistData[selectedDate] = {
+          work: [], health: [], creative: [], routine: [], personal: []
+        };
+      }
+
+      categories.forEach(cat => {
+        const section = document.createElement('div');
+        section.className = 'checklist-section visible';
+
+        const items = checklistData[selectedDate][cat] || [];
+
+        let itemsHTML = items.map((item, idx) => `
+          <div class="check-item ${item.done ? 'done' : ''}" onclick="toggleCheck('${selectedDate}', '${cat}', ${idx})">
+            <div class="ci-box">${item.done ? '✓' : ''}</div>
+            <div class="ci-text">
+              <div class="ci-title">${item.text}</div>
+            </div>
+            <div class="ci-tag tag-${cat}">${categoryLabels[cat]}</div>
+          </div>
+        `).join('');
+
+        section.innerHTML = `
+          <div class="section-title">${categoryLabels[cat]}</div>
+          ${itemsHTML}
+          <button class="add-task-btn" onclick="addCheckItem('${selectedDate}', '${cat}')">+ 항목 추가</button>
+        `;
+        content.appendChild(section);
+      });
+    }
+
+    function toggleCheck(date, cat, idx) {
+      checklistData[date][cat][idx].done = !checklistData[date][cat][idx].done;
+      saveData();
+      renderChecklist(date);
+    }
+
+    function addCheckItem(date, cat) {
+      const text = prompt('체크리스트 항목 입력');
+      if (!text) return;
+      if (!checklistData[date][cat]) checklistData[date][cat] = [];
+      checklistData[date][cat].push({ text, done: false });
+      saveData();
+      renderChecklist(date);
+    }
+
+    // Init
+    function initPlanner() {
+      renderGrid();
+      renderChecklist(dates[0]);
+    }
+
+    initPlanner();
+  </script>
+</body>
+</html>

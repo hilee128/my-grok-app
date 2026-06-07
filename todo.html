@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>투두리스트</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f9f8f6;
+      --surface: #fff;
+      --text: #1a1a1a;
+      --muted: #666;
+      --accent: #6366f1;
+    }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 40px 20px;
+      color: var(--text);
+    }
+    .container {
+      max-width: 620px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 24px;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid #e5e3df;
+      border-radius: 999px;
+      font-size: 1rem;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+    button {
+      padding: 14px 24px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .filter-btn {
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid #e5e3df;
+      background: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .filter-btn.active {
+      background: #1a1a1a;
+      color: white;
+      border-color: #1a1a1a;
+    }
+    .todo-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      padding: 14px 18px;
+      border-radius: 16px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .todo-item.done .title {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .checkbox.checked {
+      background: #6366f1;
+      border-color: #6366f1;
+      color: white;
+    }
+    .title {
+      flex: 1;
+      font-size: 0.95rem;
+    }
+    .delete {
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .footer {
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .clear-btn {
+      background: none;
+      border: 1px solid #ddd;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>투두리스트</h1>
+
+    <div class="input-row">
+      <input type="text" id="todo-input" placeholder="할 일을 입력하세요..." onkeypress="if(event.key === 'Enter') addTodo()">
+      <button onclick="addTodo()">추가</button>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter('all')">전체</button>
+      <button class="filter-btn" onclick="setFilter('active')">진행 중</button>
+      <button class="filter-btn" onclick="setFilter('completed')">완료</button>
+    </div>
+
+    <ul class="todo-list" id="todo-list"></ul>
+
+    <div class="footer">
+      <span id="count"></span>
+      <button class="clear-btn" onclick="clearCompleted()">완료 항목 삭제</button>
+    </div>
+  </div>
+
+  <script>
+    let todos = JSON.parse(localStorage.getItem('todos') || '[]');
+    let currentFilter = 'all';
+
+    function saveTodos() {
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    function renderTodos() {
+      const list = document.getElementById('todo-list');
+      list.innerHTML = '';
+
+      let filtered = todos;
+      if (currentFilter === 'active') filtered = todos.filter(t => !t.done);
+      if (currentFilter === 'completed') filtered = todos.filter(t => t.done);
+
+      filtered.forEach((todo, index) => {
+        const li = document.createElement('li');
+        li.className = 'todo-item' + (todo.done ? ' done' : '');
+
+        li.innerHTML = `
+          <div class="checkbox ${todo.done ? 'checked' : ''}" onclick="toggleTodo(${index})">
+            ${todo.done ? '✓' : ''}
+          </div>
+          <span class="title">${todo.text}</span>
+          <button class="delete" onclick="deleteTodo(${index})">×</button>
+        `;
+        list.appendChild(li);
+      });
+
+      document.getElementById('count').textContent = `${todos.filter(t => !t.done).length}개 남음`;
+    }
+
+    function addTodo() {
+      const input = document.getElementById('todo-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      todos.push({ text, done: false });
+      saveTodos();
+      input.value = '';
+      renderTodos();
+    }
+
+    function toggleTodo(index) {
+      todos[index].done = !todos[index].done;
+      saveTodos();
+      renderTodos();
+    }
+
+    function deleteTodo(index) {
+      todos.splice(index, 1);
+      saveTodos();
+      renderTodos();
+    }
+
+    function clearCompleted() {
+      todos = todos.filter(t => !t.done);
+      saveTodos();
+      renderTodos();
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      renderTodos();
+    }
+
+    renderTodos();
+  </script>
+</body>
+</html>
