@@ -25,6 +25,34 @@
   --transition: 0.2s ease;
 }
 
+.page-nav {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  font-size: 0.8rem;
+  z-index: 10;
+}
+
+.page-nav-link {
+  color: #8b7bc7;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.page-nav-link:hover {
+  background: var(--accent-soft);
+}
+
+.page-nav-current {
+  color: var(--text-muted);
+  padding: 6px 4px;
+}
+
 body {
   font-family: "DM Sans", system-ui, sans-serif;
   background: var(--bg);
