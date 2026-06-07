@@ -164,6 +164,12 @@ body {
   color: var(--text);
 }
 
+.connect-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
 .upload-btn:hover,
 .refresh-btn:hover {
   transform: translateY(-1px);

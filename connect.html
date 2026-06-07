@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>실연동 설정</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nav.css">
+  <link rel="stylesheet" href="connect.css">
+</head>
+<body>
+  <div class="connect-page">
+    <nav class="top-nav">
+      <a href="index.html" class="nav-link">투두리스트</a>
+      <a href="ads.html" class="nav-link">광고 대시보드</a>
+      <span class="nav-current">실연동 설정</span>
+    </nav>
+
+    <header class="connect-header">
+      <h1>실제 매체 연동 설정</h1>
+      <p>메타 · 유튜브 · 틱톡 API를 연결하면 저효율 캠페인이 <strong>진짜로 일시정지</strong>됩니다.</p>
+      <div class="api-status" id="api-status">API 서버 확인 중…</div>
+    </header>
+
+    <section class="step-card">
+      <h2>1단계 · API 서버 실행</h2>
+      <pre><code>cd ~/my-grok-app
+pip3 install -r requirements.txt
+./run_api.sh</code></pre>
+      <p>로컬에서 API 서버가 떠 있어야 실제 연동이 됩니다. (GitHub Pages만으로는 토큰 보관·실행 불가)</p>
+    </section>
+
+    <section class="step-card">
+      <h2>2단계 · .env 설정</h2>
+      <pre><code>cp .env.example .env
+# .env 파일 편집 후:
+API_MODE=live</code></pre>
+    </section>
+
+    <section class="platform-grid">
+      <article class="platform-card" id="card-meta">
+        <h3>메타 (Facebook / Instagram)</h3>
+        <ol>
+          <li><a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Graph API Explorer</a>에서 토큰 발급</li>
+          <li>권한: <code>ads_management</code>, <code>ads_read</code></li>
+          <li>광고계정 ID를 <code>META_AD_ACCOUNT_IDS</code>에 입력</li>
+        </ol>
+        <div class="test-result" id="result-meta">테스트 대기</div>
+      </article>
+
+      <article class="platform-card" id="card-youtube">
+        <h3>유튜브 (Google Ads)</h3>
+        <ol>
+          <li>Google Cloud OAuth 클라이언트 생성</li>
+          <li><code>python3 scripts/google_ads_auth.py</code> 실행 → refresh token 발급</li>
+          <li>Developer Token + Customer ID 설정</li>
+        </ol>
+        <div class="test-result" id="result-youtube">테스트 대기</div>
+      </article>
+
+      <article class="platform-card" id="card-tiktok">
+        <h3>틱톡</h3>
+        <ol>
+          <li><a href="https://business-api.tiktok.com/portal" target="_blank" rel="noopener">TikTok API Portal</a> 앱 생성</li>
+          <li>Access Token 발급</li>
+          <li><code>TIKTOK_ADVERTISER_IDS</code>에 광고주 ID 입력</li>
+        </ol>
+        <div class="test-result" id="result-tiktok">테스트 대기</div>
+      </article>
+    </section>
+
+    <section class="action-bar">
+      <button type="button" class="btn-primary" id="test-btn">연결 테스트</button>
+      <a href="ads.html" class="btn-secondary">대시보드로 이동</a>
+    </section>
+
+    <section class="notice">
+      <strong>⚠️ 실제 중단 주의</strong>
+      <p><code>API_MODE=live</code> 상태에서 자동 중단을 켜면, 조건에 맞는 캠페인에 <code>PAUSED</code> / <code>DISABLE</code> 요청이 실제로 전송됩니다. 먼저 연결 테스트로 계정·캠페인 수를 확인하세요.</p>
+    </section>
+  </div>
+  <script src="connect.js"></script>
+</body>
+</html>

@@ -190,13 +190,16 @@ function renderAutoCutoffBar(paused) {
   autoCutoffStatus.className = `badge ${enabled ? "badge-warn" : "badge-accent"}`;
 
   autoPauseBanner.hidden = false;
-  if (enabled && paused.length) {
+    if (enabled && paused.length) {
     const saved = paused.reduce((s, r) => s + r.Spend, 0);
     autoPauseBanner.className = "auto-pause-banner";
     autoPauseTitle.textContent = `${paused.length}개 캠페인 예산이 자동으로 꺼졌습니다`;
-    autoPauseDesc.textContent = apiAvailable
-      ? `API 연동으로 실제 중단 요청 가능 · 절감 예상 ${formatWon(saved)}`
-      : `브라우저 시뮬레이션 · API 서버 실행 시 실제 매체 연동 · 절감 ${formatWon(saved)}`;
+    const isLive = dataMode === "live";
+    autoPauseDesc.textContent = isLive
+      ? `실연동 · 매체 API로 실제 일시정지됨 · 절감 ${formatWon(saved)}`
+      : apiAvailable
+        ? `데모 모드 · connect.html 에서 API_MODE=live 설정 시 실제 중단 · 절감 ${formatWon(saved)}`
+        : `시뮬레이션 · ./run_api.sh 실행 + 실연동 설정 필요 · 절감 ${formatWon(saved)}`;
   } else if (enabled) {
     autoPauseBanner.className = "auto-pause-banner auto-pause-banner--ok";
     autoPauseTitle.textContent = "자동 중단 규칙 활성화 중";
@@ -384,11 +387,12 @@ async function tryLoadAPI(autoPause) {
     if (!res.ok) return null;
     const data = await res.json();
     apiAvailable = true;
-    dataMode = data.platform_status?.mode === "live" ? "live" : "demo";
+    dataMode = data.mode === "live" || data.platform_status?.mode === "live" ? "live" : "demo";
     return {
       rows: data.campaigns || [],
-      source: `API (${dataMode})`,
+      source: dataMode === "live" ? "실연동 API" : "데모 API",
       summary: data.summary,
+      message: data.message,
     };
   } catch {
     apiAvailable = false;
@@ -447,7 +451,11 @@ async function init(sourceFile, forceAutoPause = false) {
     if (!payload) payload = await loadCSV();
 
     renderDashboard(payload.rows, payload.source);
-    if (payload.summary) summaryText.textContent = payload.summary;
+    if (payload.summary) {
+      summaryText.textContent = payload.message
+        ? `${payload.summary} (${payload.message})`
+        : payload.summary;
+    }
   } catch (err) {
     summaryText.textContent = `오류: ${err.message}`;
     summaryBanner.hidden = false;

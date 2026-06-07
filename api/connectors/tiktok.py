@@ -14,6 +14,26 @@ class TikTokConnector:
     def is_configured(self) -> bool:
         return bool(TIKTOK_ACCESS_TOKEN and TIKTOK_ADVERTISER_IDS)
 
+    def test_connection(self) -> tuple[bool, str]:
+        headers = {"Access-Token": TIKTOK_ACCESS_TOKEN}
+        with httpx.Client(timeout=20) as client:
+            resp = client.get(
+                f"{BASE}/oauth2/advertiser/get/",
+                headers=headers,
+                params={"app_id": "0", "secret": "0"},
+            )
+            if resp.status_code == 200 and resp.json().get("code") == 0:
+                count = len(resp.json().get("data", {}).get("list", []))
+                return True, f"연결됨 · 광고주 {count}개 접근 가능"
+            probe = client.get(
+                f"{BASE}/campaign/get/",
+                headers={**headers, "Content-Type": "application/json"},
+                params={"advertiser_id": TIKTOK_ADVERTISER_IDS[0], "page": 1, "page_size": 1},
+            )
+            if probe.status_code == 200 and probe.json().get("code") == 0:
+                return True, f"연결됨 · advertiser {TIKTOK_ADVERTISER_IDS[0]}"
+            return False, probe.text
+
     def fetch_campaigns(self) -> list[Campaign]:
         if not self.is_configured():
             return []

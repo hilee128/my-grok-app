@@ -25,6 +25,22 @@ class GoogleAdsConnector:
             and GOOGLE_ADS_CUSTOMER_IDS
         )
 
+    def test_connection(self) -> tuple[bool, str]:
+        token = self._access_token()
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "developer-token": GOOGLE_ADS_DEVELOPER_TOKEN,
+        }
+        with httpx.Client(timeout=30) as client:
+            resp = client.get(
+                f"https://googleads.googleapis.com/{API_VERSION}/customers:listAccessibleCustomers",
+                headers=headers,
+            )
+            if resp.status_code != 200:
+                return False, resp.text
+            ids = resp.json().get("resourceNames", [])
+            return True, f"연결됨 · 접근 가능 계정 {len(ids)}개 · 설정 {len(GOOGLE_ADS_CUSTOMER_IDS)}개"
+
     def _access_token(self) -> str:
         with httpx.Client(timeout=30) as client:
             resp = client.post(

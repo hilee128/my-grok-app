@@ -14,6 +14,17 @@ class MetaConnector:
     def is_configured(self) -> bool:
         return bool(META_ACCESS_TOKEN and META_AD_ACCOUNT_IDS)
 
+    def test_connection(self) -> tuple[bool, str]:
+        with httpx.Client(timeout=20) as client:
+            resp = client.get(
+                f"{GRAPH}/me",
+                params={"access_token": META_ACCESS_TOKEN, "fields": "id,name"},
+            )
+            if resp.status_code != 200:
+                return False, resp.text
+            user = resp.json()
+            return True, f"연결됨 · {user.get('name', user.get('id'))} · 광고계정 {len(META_AD_ACCOUNT_IDS)}개"
+
     def fetch_campaigns(self) -> list[Campaign]:
         if not self.is_configured():
             return []

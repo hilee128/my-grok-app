@@ -1,0 +1,140 @@
+body {
+  font-family: "DM Sans", system-ui, sans-serif;
+  background: #f7f5fb;
+  color: #3d3550;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.connect-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.connect-header h1 {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
+.connect-header p {
+  color: #8f86a3;
+}
+
+.api-status {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  background: #fff;
+  border: 1px solid rgba(184, 169, 232, 0.25);
+}
+
+.api-status.ok { background: #e8faf2; border-color: #a8e6cf; color: #2d8f6a; }
+.api-status.warn { background: #fff0eb; border-color: #e07a5f; color: #c45a3a; }
+.api-status.live { background: #ede8f8; border-color: #b8a9e8; color: #6b5bb0; }
+
+.step-card {
+  background: #fff;
+  border: 1px solid rgba(184, 169, 232, 0.22);
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin: 16px 0;
+  box-shadow: 0 8px 30px rgba(100, 80, 150, 0.06);
+}
+
+.step-card h2 {
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.step-card pre {
+  background: #f7f5fb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 0.82rem;
+}
+
+.platform-grid {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.platform-card {
+  background: #fff;
+  border: 1px solid rgba(184, 169, 232, 0.22);
+  border-radius: 16px;
+  padding: 20px 22px;
+}
+
+.platform-card h3 {
+  margin-bottom: 10px;
+}
+
+.platform-card ol {
+  margin: 0 0 14px 18px;
+  font-size: 0.88rem;
+  color: #5c5470;
+}
+
+.platform-card a {
+  color: #8b7bc7;
+}
+
+.test-result {
+  font-size: 0.82rem;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f7f5fb;
+  color: #8f86a3;
+}
+
+.test-result.ok { background: #e8faf2; color: #2d8f6a; }
+.test-result.fail { background: #fff0eb; color: #c45a3a; }
+
+.platform-card.connected { border-color: #a8e6cf; }
+
+.action-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #b8a9e8, #c9bdf0);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #6b5bb0;
+  border: 1px solid rgba(184, 169, 232, 0.3);
+  display: inline-flex;
+  align-items: center;
+}
+
+.notice {
+  background: #fff8f5;
+  border: 1px solid rgba(224, 122, 95, 0.3);
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-size: 0.88rem;
+}
+
+.notice strong { color: #c45a3a; }
