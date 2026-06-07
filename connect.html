@@ -25,11 +25,10 @@
     </header>
 
     <section class="step-card">
-      <h2>1단계 · API 서버 실행</h2>
-      <pre><code>cd ~/my-grok-app
-pip3 install -r requirements.txt
-./run_api.sh</code></pre>
-      <p>로컬에서 API 서버가 떠 있어야 실제 연동이 됩니다. (GitHub Pages만으로는 토큰 보관·실행 불가)</p>
+      <h2>1단계 · 배포 (팀 내부용)</h2>
+      <pre><code># Railway 등에 배포 후 팀 URL 공유
+# 또는 로컬: ./run_api.sh</code></pre>
+      <p>웹+API가 <strong>한 서버</strong>에서 실행됩니다. 팀원은 URL + 비밀번호만 알면 됩니다.</p>
     </section>
 
     <section class="step-card">
@@ -81,6 +80,7 @@ API_MODE=live</code></pre>
       <p><code>API_MODE=live</code> 상태에서 자동 중단을 켜면, 조건에 맞는 캠페인에 <code>PAUSED</code> / <code>DISABLE</code> 요청이 실제로 전송됩니다. 먼저 연결 테스트로 계정·캠페인 수를 확인하세요.</p>
     </section>
   </div>
+  <script src="team-auth.js"></script>
   <script src="connect.js"></script>
 </body>
 </html>

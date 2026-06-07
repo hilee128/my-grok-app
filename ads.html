@@ -25,7 +25,8 @@
         <p class="mode-badge" id="mode-badge">데모 모드</p>
       </div>
       <div class="header-actions">
-        <a href="connect.html" class="refresh-btn connect-link">실연동 설정</a>
+        <a href="connect.html" class="refresh-btn connect-link">연동 설정</a>
+        <button type="button" class="refresh-btn" id="logout-btn">로그아웃</button>
         <label class="upload-btn">
           CSV 업로드
           <input type="file" id="csv-upload" accept=".csv" hidden>
@@ -197,6 +198,7 @@
     <p>데이터 분석 중…</p>
   </div>
 
+  <script src="team-auth.js"></script>
   <script src="ads.js"></script>
 </body>
 </html>

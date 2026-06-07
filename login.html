@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>팀 로그인</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="connect.css">
+  <style>
+    .login-box { max-width: 400px; margin: 80px auto; background: #fff; border-radius: 18px; padding: 32px; border: 1px solid rgba(184,169,232,.22); box-shadow: 0 10px 40px rgba(100,80,150,.08); }
+    .login-box h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    .login-box p { color: #8f86a3; font-size: 0.9rem; margin-bottom: 24px; }
+    .login-box input { width: 100%; padding: 14px 16px; border: 1.5px solid rgba(184,169,232,.3); border-radius: 12px; font-size: 1rem; margin-bottom: 16px; }
+    .login-box button { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #b8a9e8, #c9bdf0); color: #fff; font-weight: 600; font-size: 1rem; cursor: pointer; }
+    .error { color: #c45a3a; font-size: 0.85rem; margin-top: 12px; min-height: 20px; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h1>팀 내부 로그인</h1>
+    <p>광고 성과 대시보드 · 메타 · 유튜브 · 틱톡</p>
+    <form id="login-form">
+      <input type="password" id="password" placeholder="팀 비밀번호" autocomplete="current-password" required>
+      <button type="submit">로그인</button>
+    </form>
+    <p class="error" id="error"></p>
+  </div>
+  <script src="team-auth.js"></script>
+  <script>
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const err = document.getElementById("error");
+      err.textContent = "";
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: document.getElementById("password").value }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "로그인 실패");
+        setTeamToken(data.token);
+        window.location.href = "ads.html";
+      } catch (ex) {
+        err.textContent = ex.message;
+      }
+    });
+    fetch(`${API_BASE}/api/auth/required`).then(r => r.json()).then(d => {
+      if (!d.required) window.location.href = "ads.html";
+    });
+  </script>
+</body>
+</html>

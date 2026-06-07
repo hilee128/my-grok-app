@@ -1,9 +1,7 @@
-const API_BASE = "http://127.0.0.1:8000";
-
 async function checkApi() {
   const el = document.getElementById("api-status");
   try {
-    const res = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(3000) });
+    const res = await fetch(`${window.location.origin}/api/health`, { signal: AbortSignal.timeout(3000) });
     const data = await res.json();
     if (data.mode === "live" && data.live_pause_enabled) {
       el.className = "api-status live";
@@ -41,7 +39,7 @@ async function runTests() {
   btn.textContent = "테스트 중…";
 
   try {
-    const res = await fetch(`${API_BASE}/api/connect/test`, { signal: AbortSignal.timeout(30000) });
+    const res = await apiFetch(`/api/connect/test`, { signal: AbortSignal.timeout(30000) });
     const data = await res.json();
     data.platforms.forEach((p) => renderPlatformResult(p.platform, p));
 
@@ -59,4 +57,4 @@ async function runTests() {
 }
 
 document.getElementById("test-btn").addEventListener("click", runTests);
-checkApi().then((ok) => { if (ok) runTests(); });
+ensureTeamAuth().then(() => checkApi().then((ok) => { if (ok) runTests(); }));

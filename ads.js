@@ -1,6 +1,6 @@
 const CSV_PATH = "ad_performance_raw.csv";
 const JSON_PATH = "data/campaigns.json";
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = window.location.origin;
 const SPEND_MIN = 500_000;
 const ROAS_MAX = 150;
 const AUTO_CUTOFF_KEY = "ads-auto-cutoff-enabled";
@@ -382,8 +382,8 @@ function renderDashboard(rows, sourceName) {
 
 async function tryLoadAPI(autoPause) {
   try {
-    const url = autoPause ? `${API_BASE}/api/auto-pause` : `${API_BASE}/api/analyze?auto_pause=false`;
-    const res = await fetch(url, { method: "POST", signal: AbortSignal.timeout(3000) });
+    const url = autoPause ? `/api/auto-pause` : `/api/analyze?auto_pause=false`;
+    const res = await apiFetch(url, { method: "POST", signal: AbortSignal.timeout(8000) });
     if (!res.ok) return null;
     const data = await res.json();
     apiAvailable = true;
@@ -488,4 +488,9 @@ document.getElementById("csv-upload").addEventListener("change", (e) => {
   if (file) init(file);
 });
 
-init();
+document.getElementById("logout-btn")?.addEventListener("click", () => {
+  clearTeamToken();
+  window.location.href = "login.html";
+});
+
+ensureTeamAuth().then(() => init());
