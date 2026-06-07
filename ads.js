@@ -9,19 +9,29 @@ const MANUAL_RESUME_KEY = "ads-manual-resume";
 
 const PLATFORM_LABELS = { meta: "메타", youtube: "유튜브", tiktok: "틱톡", all: "전체" };
 
-const loading = document.getElementById("loading");
-const summaryBanner = document.getElementById("summary-banner");
-const summaryText = document.getElementById("summary-text");
-const warningPanel = document.getElementById("warning-panel");
-const warningCount = document.getElementById("warning-count");
-const dataSource = document.getElementById("data-source");
-const generatedAt = document.getElementById("generated-at");
-const modeBadge = document.getElementById("mode-badge");
-const autoCutoffToggle = document.getElementById("auto-cutoff-toggle");
-const autoCutoffStatus = document.getElementById("auto-cutoff-status");
-const autoPauseBanner = document.getElementById("auto-pause-banner");
-const autoPauseTitle = document.getElementById("auto-pause-title");
-const autoPauseDesc = document.getElementById("auto-pause-desc");
+let loading, summaryBanner, summaryText, warningPanel, warningCount, dataSource, generatedAt, modeBadge, autoCutoffToggle, autoCutoffStatus, autoPauseBanner, autoPauseTitle, autoPauseDesc;
+
+function setupElements() {
+  loading = document.getElementById("loading");
+  summaryBanner = document.getElementById("summary-banner");
+  summaryText = document.getElementById("summary-text");
+  warningPanel = document.getElementById("warning-panel");
+  warningCount = document.getElementById("warning-count");
+  dataSource = document.getElementById("data-source");
+  generatedAt = document.getElementById("generated-at");
+  modeBadge = document.getElementById("mode-badge");
+  autoCutoffToggle = document.getElementById("auto-cutoff-toggle");
+  autoCutoffStatus = document.getElementById("auto-cutoff-status");
+  autoPauseBanner = document.getElementById("auto-pause-banner");
+  autoPauseTitle = document.getElementById("auto-pause-title");
+  autoPauseDesc = document.getElementById("auto-pause-desc");
+}
+
+function safeShowLoading(show) {
+  if (loading && loading.classList) {
+    loading.classList.toggle("hidden", !show);
+  }
+}
 
 let currentRows = [];
 let currentSource = JSON_PATH;
@@ -30,7 +40,7 @@ let apiAvailable = false;
 let dataMode = "demo";
 
 function showLoading(show) {
-  loading.classList.toggle("hidden", !show);
+  safeShowLoading(show);
 }
 
 function formatWon(value) {
@@ -435,7 +445,8 @@ async function loadCSV() {
 }
 
 async function init(sourceFile, forceAutoPause = false) {
-  showLoading(true);
+  setupElements();
+  safeShowLoading(true);
   try {
     let payload = null;
 
@@ -464,7 +475,7 @@ async function init(sourceFile, forceAutoPause = false) {
       : `오류: ${err.message}`;
     summaryBanner.hidden = false;
   } finally {
-    showLoading(false);
+    safeShowLoading(false);
   }
 }
 
