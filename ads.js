@@ -450,9 +450,20 @@ async function init(sourceFile, forceAutoPause = false) {
   try {
     let payload = null;
 
+    const isGitHubPages = window.location.hostname.includes('github.io');
+
     if (!sourceFile) {
-      payload = await tryLoadAPI(forceAutoPause && isAutoCutoffEnabled());
-      if (!payload) payload = await loadJSON();
+      if (isGitHubPages) {
+        // Static GitHub Pages에서는 API 시도 없이 바로 로컬 데이터 로드
+        try {
+          payload = await loadJSON();
+        } catch (e) {
+          payload = await loadCSV();
+        }
+      } else {
+        payload = await tryLoadAPI(forceAutoPause && isAutoCutoffEnabled());
+        if (!payload) payload = await loadJSON();
+      }
     }
 
     if (sourceFile) {
@@ -467,11 +478,14 @@ async function init(sourceFile, forceAutoPause = false) {
       summaryText.textContent = payload.message
         ? `${payload.summary} (${payload.message})`
         : payload.summary;
+    } else if (isGitHubPages) {
+      summaryText.textContent = "데모 데이터 로드 완료 (GitHub Pages 정적)";
+      summaryBanner.hidden = false;
     }
   } catch (err) {
-    const onStaticHost = !apiAvailable && !window.location.hostname.includes("railway.app");
+    const onStaticHost = !apiAvailable && !window.location.hostname.includes("railway.app") || window.location.hostname.includes('github.io');
     summaryText.textContent = onStaticHost
-      ? `데모 데이터를 불러오지 못했습니다. 팀 대시보드는 ${TEAM_APP_URL}/login.html 에서 이용하세요.`
+      ? `데모 데이터를 불러오지 못했습니다. (파일 경로/형식 확인 필요) 팀 대시보드는 ${TEAM_APP_URL}/login.html 에서 이용하세요.`
       : `오류: ${err.message}`;
     summaryBanner.hidden = false;
   } finally {
