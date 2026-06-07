@@ -583,12 +583,20 @@ tbody tr:hover {
   .header-actions {
     flex-wrap: wrap;
     gap: 8px;
+    width: 100%;
   }
 
   .upload-btn,
   .refresh-btn {
     padding: 8px 14px;
     font-size: 0.8rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .connect-link {
+    width: 100%;
+    text-align: center;
   }
 
   .two-col {
@@ -615,6 +623,8 @@ tbody tr:hover {
   .table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
   }
 
   table {
@@ -624,11 +634,16 @@ tbody tr:hover {
 
   .platform-filters {
     gap: 6px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
   }
 
   .platform-btn {
     padding: 6px 12px;
     font-size: 0.75rem;
+    white-space: nowrap;
   }
 
   .auto-cutoff-bar {
@@ -651,5 +666,11 @@ tbody tr:hover {
   table {
     min-width: 540px;
     font-size: 0.72rem;
+  }
+
+  .header-actions .upload-btn,
+  .header-actions .refresh-btn {
+    font-size: 0.7rem;
+    padding: 6px 10px;
   }
 }
