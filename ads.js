@@ -1,7 +1,5 @@
 const CSV_PATH = "ad_performance_raw.csv";
 const JSON_PATH = "data/campaigns.json";
-const API_BASE = window.location.origin;
-const TEAM_APP_URL = "https://my-grok-app-production.up.railway.app";
 const SPEND_MIN = 500_000;
 const ROAS_MAX = 150;
 const AUTO_CUTOFF_KEY = "ads-auto-cutoff-enabled";
