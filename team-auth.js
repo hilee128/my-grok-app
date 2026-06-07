@@ -35,11 +35,27 @@ async function apiFetch(path, options = {}) {
   return res;
 }
 
+async function isTeamApiAvailable() {
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/required`, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return false;
+    await res.json();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function ensureTeamAuth() {
-  const res = await fetch(`${API_BASE}/api/auth/required`);
-  const data = await res.json();
-  if (!data.required) return;
-  if (!getTeamToken() && !window.location.pathname.endsWith("login.html")) {
-    window.location.href = "login.html";
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/required`, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.required) return;
+    if (!getTeamToken() && !window.location.pathname.endsWith("login.html")) {
+      window.location.href = "login.html";
+    }
+  } catch {
+    // GitHub Pages 등 정적 호스팅: API 없음 → 데모 JSON으로 동작
   }
 }

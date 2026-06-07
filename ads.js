@@ -493,4 +493,6 @@ document.getElementById("logout-btn")?.addEventListener("click", () => {
   window.location.href = "login.html";
 });
 
-ensureTeamAuth().then(() => init());
+ensureTeamAuth()
+  .then(() => init())
+  .catch(() => init());

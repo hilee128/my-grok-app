@@ -24,9 +24,19 @@
       <button type="submit">로그인</button>
     </form>
     <p class="error" id="error"></p>
+    <p class="error" id="static-hint" style="color:#6b5f8a;margin-top:16px;line-height:1.5"></p>
   </div>
   <script src="team-auth.js"></script>
   <script>
+    const TEAM_APP_URL = "https://my-grok-app-production.up.railway.app/login.html";
+
+    isTeamApiAvailable().then((ok) => {
+      if (!ok) {
+        document.getElementById("static-hint").innerHTML =
+          `팀 로그인 API는 Railway 배포에서만 동작합니다.<br><a href="${TEAM_APP_URL}">팀 대시보드 열기</a>`;
+      }
+    });
+
     document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const err = document.getElementById("error");
